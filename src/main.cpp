@@ -40,7 +40,6 @@ static void sendJsonConfig()
 #if USE_BLE
     serializeJson(config_message, ble_output_buffer, WRITE_BUFFER_SIZE);
     configChar.writeValue(ble_output_buffer, WRITE_BUFFER_SIZE);
-    Serial.println(ble_output_buffer);
 #else
     serializeJson(config_message, Serial);
 #endif //USE_BLE
@@ -66,6 +65,7 @@ static void setup_imu()
     config_message["Columns"]["AccelerometerX"] = column_index++;
     config_message["Columns"]["AccelerometerY"] = column_index++;
     config_message["Columns"]["AccelerometerZ"] = column_index++;
+    actual_odr = IMU.getAccelODR();
 
 #elif (ENABLE_ACCEL && ENABLE_GYRO)
     IMU.setAccelODR(accel_gyro_speed);
@@ -77,9 +77,11 @@ static void setup_imu()
     config_message["Columns"]["GyroscopeX"] = column_index++;
     config_message["Columns"]["GyroscopeY"] = column_index++;
     config_message["Columns"]["GyroscopeZ"] = column_index++;
+    actual_odr = IMU.getAccelODR();
 #else //gyro only
     IMU.setAccelODR(ACCEL_GYRO_ODR_OFF);
     IMU.setGyroODR(accel_gyro_speed);
+    actual_odr = IMU.getGyroODR();
 #endif
 
 #if ENABLE_MAG
@@ -91,7 +93,7 @@ static void setup_imu()
     IMU.setMagnetODR(0);
 #endif
     IMU.setContinuousMode();
-    actual_odr = IMU.getAccelODR();
+
 }
 
 #if USE_BLE
@@ -123,6 +125,7 @@ void onBLEDisconnected(BLEDevice central)
     Serial.print("Disconnected event, central: ");
     Serial.println(central.address());
     disconnectedLight();
+    BLE.setConnectable(true);
 }
 
 void onDataCharSubscribed(BLEDevice central, BLECharacteristic ch)
@@ -142,14 +145,14 @@ static void setup_ble()
 
     BLE.setLocalName(nameOfPeripheral);
     BLE.setAdvertisedService(sensorService);
-    BLE.setConnectionInterval(0x0001, 0x0002); //1.25 to 2.5ms
+    BLE.setConnectionInterval(0x0006, 0x0007); //1.25 to 2.5ms
     BLE.noDebug();
 
     configChar.addDescriptor(configNameDescriptor);
     sensorDataChar.addDescriptor(sensorDataDescriptor);
     sensorService.addCharacteristic(configChar);
     sensorService.addCharacteristic(sensorDataChar);
-    sendJsonConfig();
+
     delay(1000);
     BLE.addService(sensorService);
 
@@ -160,20 +163,23 @@ static void setup_ble()
     sensorDataChar.setEventHandler(BLESubscribed, onDataCharSubscribed);
 
     BLE.advertise();
-    BLE.setConnectable(true);
+
+
 
     Serial.println("Bluetooth device active, waiting for connections...");
+
 }
 #endif //#if USE_BLE
 
 void setup()
 {
-
+    Serial.begin(SERIAL_BAUD_RATE);
 #if USE_BLE
     setup_ble();
 #endif
-    Serial.begin(SERIAL_BAUD_RATE); //Serial monitor to display all sensor values
     setup_imu();
+    delay(1000);
+    sendJsonConfig();
 }
 
 static void update_imu()
