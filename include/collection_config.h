@@ -6,14 +6,17 @@
  * BLE Settings
  *
  */
-#define USE_BLE 1
+#define USE_BLE 0
+
 const char* nameOfPeripheral = "Nano 33 DCL";
 const char* uuidOfService = "16480000-0525-4ad5-b4fb-6dd83f49546b";
 const char* uuidOfConfigChar = "16480001-0525-4ad5-b4fb-6dd83f49546b";
 const char* uuidOfDataChar = "16480002-0525-4ad5-b4fb-6dd83f49546b";
+
+
 const int WRITE_BUFFER_SIZE = 256;
 bool WRITE_BUFFER_FIXED_LENGTH = false;
-char ble_output_buffer[WRITE_BUFFER_SIZE];
+
 
 /**
  *
@@ -60,7 +63,7 @@ typedef enum {
 } mag_odr_t;
 
 //Default sample rates. Note: Mag will be read at a higher rate.
-#define ACCEL_GYRO_DEFAULT_ODR ACCEL_GYRO_ODR_476HZ
+#define ACCEL_GYRO_DEFAULT_ODR ACCEL_GYRO_ODR_119HZ
 #define MAG_DEFAULT_ODR MAG_ODR_20HZ
 
 

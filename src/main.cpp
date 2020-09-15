@@ -8,9 +8,10 @@
 
 #include "collection_config.h"
 
-#define MAX_NUMBER_OF_COLUMNS 10
+
 
 #if USE_BLE
+#define MAX_NUMBER_OF_COLUMNS 10
 #include <ArduinoBLE.h>
 
 // BLE Service
@@ -21,12 +22,18 @@ BLECharacteristic configChar(uuidOfConfigChar, BLERead, WRITE_BUFFER_SIZE, WRITE
 BLEDescriptor configNameDescriptor("2901", "Sensor Configuration");
 BLECharacteristic sensorDataChar(uuidOfDataChar, BLERead | BLENotify, 20, WRITE_BUFFER_FIXED_LENGTH);
 BLEDescriptor sensorDataDescriptor("2901", "Sensor Data TX");
-#endif
+#else
+#define MAX_NUMBER_OF_COLUMNS 20
+#endif //USE_BLE
 
+
+static char ble_output_buffer[WRITE_BUFFER_SIZE];
 static accel_gyro_odr_t accel_gyro_speed = ACCEL_GYRO_DEFAULT_ODR;
 static float actual_odr;
 static mag_odr_t mag_speed = MAG_DEFAULT_ODR;
 static bool config_received = false;
+static unsigned long currentMs, previousMs;
+static long interval = 0;
 
 static int16_t sensorRawData[MAX_NUMBER_OF_COLUMNS];
 static int sensorRawIndex = 0;
@@ -37,12 +44,33 @@ static int column_index = 0;
 
 static void sendJsonConfig()
 {
+
 #if USE_BLE
     serializeJson(config_message, ble_output_buffer, WRITE_BUFFER_SIZE);
     configChar.writeValue(ble_output_buffer, WRITE_BUFFER_SIZE);
 #else
-    serializeJson(config_message, Serial);
+    serializeJson(config_message, ble_output_buffer, WRITE_BUFFER_SIZE);
+    Serial.println(ble_output_buffer);
+    Serial.flush();
 #endif //USE_BLE
+}
+
+static int get_acc_gyro_odr()
+{
+    switch (ACCEL_GYRO_DEFAULT_ODR) {
+    case ACCEL_GYRO_ODR_OFF:
+        return 0;
+    case ACCEL_GYRO_ODR_10HZ:
+        return 10;
+    case ACCEL_GYRO_ODR_50HZ:
+        return 50;
+    case ACCEL_GYRO_ODR_119HZ:
+        return 119;
+    case ACCEL_GYRO_ODR_238HZ:
+        return 238;
+    case ACCEL_GYRO_ODR_476HZ:
+        return 476;
+    }
 }
 
 static void setup_imu()
@@ -61,39 +89,39 @@ static void setup_imu()
 #if ENABLE_ACCEL && (ENABLE_GYRO == 0)
     IMU.setAccelODR(accel_gyro_speed);
     IMU.setGyroODR(ACCEL_GYRO_ODR_OFF);
-    config_message["sample_rate"] = (int)IMU.getAccelODR();
-    config_message["Columns"]["AccelerometerX"] = column_index++;
-    config_message["Columns"]["AccelerometerY"] = column_index++;
-    config_message["Columns"]["AccelerometerZ"] = column_index++;
-    actual_odr = IMU.getAccelODR();
+
+    config_message["column_location"]["AccelerometerX"] = column_index++;
+    config_message["column_location"]["AccelerometerY"] = column_index++;
+    config_message["column_location"]["AccelerometerZ"] = column_index++;
+    actual_odr = get_acc_gyro_odr();
+    config_message["sample_rate"] = (int)actual_odr();
 
 #elif (ENABLE_ACCEL && ENABLE_GYRO)
     IMU.setAccelODR(accel_gyro_speed);
     IMU.setGyroODR(accel_gyro_speed);
     config_message["sample_rate"] = (int)IMU.getAccelODR();
-    config_message["Columns"]["AccelerometerX"] = column_index++;
-    config_message["Columns"]["AccelerometerY"] = column_index++;
-    config_message["Columns"]["AccelerometerZ"] = column_index++;
-    config_message["Columns"]["GyroscopeX"] = column_index++;
-    config_message["Columns"]["GyroscopeY"] = column_index++;
-    config_message["Columns"]["GyroscopeZ"] = column_index++;
-    actual_odr = IMU.getAccelODR();
+    config_message["column_location"]["AccelerometerX"] = column_index++;
+    config_message["column_location"]["AccelerometerY"] = column_index++;
+    config_message["column_location"]["AccelerometerZ"] = column_index++;
+    config_message["column_location"]["GyroscopeX"] = column_index++;
+    config_message["column_location"]["GyroscopeY"] = column_index++;
+    config_message["column_location"]["GyroscopeZ"] = column_index++;
+    actual_odr = get_acc_gyro_odr();
 #else //gyro only
     IMU.setAccelODR(ACCEL_GYRO_ODR_OFF);
     IMU.setGyroODR(accel_gyro_speed);
-    actual_odr = IMU.getGyroODR();
+    actual_odr = get_acc_gyro_odr();
 #endif
 
 #if ENABLE_MAG
     IMU.setMagnetODR(mag_speed);
-    config_message["Columns"]["MagnetometerX"] = column_index++;
-    config_message["Columns"]["MagnetometerY"] = column_index++;
-    config_message["Columns"]["MagnetometerZ"] = column_index++;
+    config_message["column_location"]["MagnetometerX"] = column_index++;
+    config_message["column_location"]["MagnetometerY"] = column_index++;
+    config_message["column_location"]["MagnetometerZ"] = column_index++;
 #else
     IMU.setMagnetODR(0);
 #endif
     IMU.setContinuousMode();
-
 }
 
 #if USE_BLE
@@ -117,7 +145,6 @@ void onBLEConnected(BLEDevice central)
     Serial.print("Connected event, central: ");
     Serial.println(central.address());
     connectedLight();
-
 }
 
 void onBLEDisconnected(BLEDevice central)
@@ -164,44 +191,46 @@ static void setup_ble()
 
     BLE.advertise();
 
-
-
     Serial.println("Bluetooth device active, waiting for connections...");
-
 }
 #endif //#if USE_BLE
 
 void setup()
 {
     Serial.begin(SERIAL_BAUD_RATE);
+    Serial.println("Setting up...");
+
 #if USE_BLE
     setup_ble();
-#endif
+#endif //USE_BLE
+
     setup_imu();
+    interval = (1000 / (long)actual_odr);
     delay(1000);
     sendJsonConfig();
 }
 
 static void update_imu()
 {
-    //Accelerometer values
-    if (IMU.accelerationAvailable() && ENABLE_ACCEL) {
+    //Accelerometer values IMU.accelerationAvailable() &&
+    if (ENABLE_ACCEL) {
         IMU.readRawAccelInt16(sensorRawData[sensorRawIndex++], sensorRawData[sensorRawIndex++], sensorRawData[sensorRawIndex++]);
     }
 
-    //Gyroscope values
-    if (IMU.gyroscopeAvailable() && ENABLE_GYRO) {
+    //Gyroscope values IMU.gyroscopeAvailable() &&
+    if (ENABLE_GYRO) {
         IMU.readRawGyroInt16(sensorRawData[sensorRawIndex++], sensorRawData[sensorRawIndex++], sensorRawData[sensorRawIndex++]);
     }
 
-    //Magnetometer values
-    if (IMU.magneticFieldAvailable() && ENABLE_MAG) {
+    //Magnetometer values IMU.magneticFieldAvailable() &&
+    if (ENABLE_MAG) {
         IMU.readRawMagnetInt16(sensorRawData[sensorRawIndex++], sensorRawData[sensorRawIndex++], sensorRawData[sensorRawIndex++]);
     }
 }
 
 void loop()
 {
+    currentMs = millis();
 #if USE_BLE
 
     delay(1000);
@@ -221,26 +250,35 @@ void loop()
     if (!config_received) {
         sendJsonConfig();
         delay(1000);
-        int x = Serial.available();
-        if (x > 0) {
+        if(Serial.available() > 0)
+        {
             String rx = Serial.readString();
-            Serial.println(rx);
-            if (rx.equals("sensiml")) {
+            if (rx.equals("connect"))
+            {
                 config_received = true;
             }
-            config_message.clear();
         }
-        return;
     }
+
+
+    else
+    {
+
 #endif
-    update_imu();
+        if (currentMs - previousMs >= interval)
+        {
+            // save the last time you blinked the LED
+            previousMs = currentMs;
+            update_imu();
 
 #if USE_BLE
-    sensorDataChar.writeValue((void*)sensorRawData, sensorRawIndex * sizeof(int16_t));
+            sensorDataChar.writeValue((void*)sensorRawData, sensorRawIndex * sizeof(int16_t));
 #else
-    Serial.write((uint8_t*)sensorRawData, sensorRawIndex * sizeof(int16_t));
+            Serial.write((uint8_t*)sensorRawData, sensorRawIndex * sizeof(int16_t));
+            Serial.flush();
 #endif //USE_BLE
-    sensorRawIndex = 0;
-    memset(sensorRawData, 0, MAX_NUMBER_OF_COLUMNS * sizeof(int16_t));
-    delay(1000 / (long)actual_odr);
+            sensorRawIndex = 0;
+            memset(sensorRawData, 0, MAX_NUMBER_OF_COLUMNS * sizeof(int16_t));
+        }
+    }
 }
