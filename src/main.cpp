@@ -12,6 +12,7 @@
 
 #if USE_BLE
 #define MAX_NUMBER_OF_COLUMNS 10
+#define MAX_SAMPLES_PER_PACKET 1
 #include <ArduinoBLE.h>
 
 // BLE Service
@@ -24,6 +25,7 @@ BLECharacteristic sensorDataChar(uuidOfDataChar, BLERead | BLENotify, 20, WRITE_
 BLEDescriptor sensorDataDescriptor("2901", "Sensor Data TX");
 #else
 #define MAX_NUMBER_OF_COLUMNS 20
+#define MAX_SAMPLES_PER_PACKET 6
 #endif //USE_BLE
 
 
@@ -35,7 +37,7 @@ static bool config_received = false;
 static unsigned long currentMs, previousMs;
 static long interval = 0;
 
-static int16_t sensorRawData[MAX_NUMBER_OF_COLUMNS];
+static int16_t sensorRawData[MAX_SAMPLES_PER_PACKET*MAX_NUMBER_OF_COLUMNS];
 static int sensorRawIndex = 0;
 
 DynamicJsonDocument config_message(256);
@@ -228,6 +230,7 @@ static void update_imu()
     }
 }
 
+static int packetNum = 0;
 void loop()
 {
     currentMs = millis();
@@ -270,15 +273,26 @@ void loop()
             // save the last time you blinked the LED
             previousMs = currentMs;
             update_imu();
+            packetNum++;
+
 
 #if USE_BLE
             sensorDataChar.writeValue((void*)sensorRawData, sensorRawIndex * sizeof(int16_t));
-#else
-            Serial.write((uint8_t*)sensorRawData, sensorRawIndex * sizeof(int16_t));
-            Serial.flush();
-#endif //USE_BLE
             sensorRawIndex = 0;
-            memset(sensorRawData, 0, MAX_NUMBER_OF_COLUMNS * sizeof(int16_t));
+            memset(sensorRawData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
+#else
+            if(packetNum == MAX_SAMPLES_PER_PACKET)
+            {
+                Serial.write((uint8_t*)sensorRawData, sensorRawIndex * sizeof(int16_t));
+                Serial.flush();
+
+
+                sensorRawIndex = 0;
+
+                memset(sensorRawData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
+                packetNum = 0;
+            }
+#endif //USE_BLE
         }
     }
 }
