@@ -96,12 +96,13 @@ static void setup_imu()
     config_message["column_location"]["AccelerometerY"] = column_index++;
     config_message["column_location"]["AccelerometerZ"] = column_index++;
     actual_odr = get_acc_gyro_odr();
-    config_message["sample_rate"] = (int)actual_odr();
+    config_message["sample_rate"] = (int)actual_odr;
 
 #elif (ENABLE_ACCEL && ENABLE_GYRO)
     IMU.setAccelODR(accel_gyro_speed);
     IMU.setGyroODR(accel_gyro_speed);
-    config_message["sample_rate"] = (int)IMU.getAccelODR();
+    actual_odr = get_acc_gyro_odr();
+    config_message["sample_rate"] = (int)actual_odr;
     config_message["column_location"]["AccelerometerX"] = column_index++;
     config_message["column_location"]["AccelerometerY"] = column_index++;
     config_message["column_location"]["AccelerometerZ"] = column_index++;
@@ -113,6 +114,10 @@ static void setup_imu()
     IMU.setAccelODR(ACCEL_GYRO_ODR_OFF);
     IMU.setGyroODR(accel_gyro_speed);
     actual_odr = get_acc_gyro_odr();
+    config_message["sample_rate"] = (int)actual_odr;
+    config_message["column_location"]["GyroscopeX"] = column_index++;
+    config_message["column_location"]["GyroscopeY"] = column_index++;
+    config_message["column_location"]["GyroscopeZ"] = column_index++;
 #endif
 
 #if ENABLE_MAG
