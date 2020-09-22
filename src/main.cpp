@@ -30,9 +30,9 @@ BLEDescriptor sensorDataDescriptor("2901", "Sensor Data TX");
 
 
 static char ble_output_buffer[WRITE_BUFFER_SIZE];
-static accel_gyro_odr_t accel_gyro_speed = ACCEL_GYRO_DEFAULT_ODR;
-static float actual_odr;
-static mag_odr_t mag_speed = MAG_DEFAULT_ODR;
+
+static int actual_odr;
+
 static bool config_received = false;
 static unsigned long currentMs, previousMs;
 static long interval = 0;
@@ -89,20 +89,20 @@ static void setup_imu()
     IMU.magnetUnit = MICROTESLA;
 
 #if ENABLE_ACCEL && (ENABLE_GYRO == 0)
-    IMU.setAccelODR(accel_gyro_speed);
+    IMU.setAccelODR(ACCEL_GYRO_DEFAULT_ODR);
     IMU.setGyroODR(ACCEL_GYRO_ODR_OFF);
 
     config_message["column_location"]["AccelerometerX"] = column_index++;
     config_message["column_location"]["AccelerometerY"] = column_index++;
     config_message["column_location"]["AccelerometerZ"] = column_index++;
     actual_odr = get_acc_gyro_odr();
-    config_message["sample_rate"] = (int)actual_odr;
+    config_message["sample_rate"] = actual_odr;
 
 #elif (ENABLE_ACCEL && ENABLE_GYRO)
-    IMU.setAccelODR(accel_gyro_speed);
-    IMU.setGyroODR(accel_gyro_speed);
+    IMU.setAccelODR(ACCEL_GYRO_DEFAULT_ODR);
+    IMU.setGyroODR(ACCEL_GYRO_DEFAULT_ODR);
     actual_odr = get_acc_gyro_odr();
-    config_message["sample_rate"] = (int)actual_odr;
+    config_message["sample_rate"] = actual_odr;
     config_message["column_location"]["AccelerometerX"] = column_index++;
     config_message["column_location"]["AccelerometerY"] = column_index++;
     config_message["column_location"]["AccelerometerZ"] = column_index++;
@@ -112,16 +112,16 @@ static void setup_imu()
     actual_odr = get_acc_gyro_odr();
 #else //gyro only
     IMU.setAccelODR(ACCEL_GYRO_ODR_OFF);
-    IMU.setGyroODR(accel_gyro_speed);
+    IMU.setGyroODR(ACCEL_GYRO_DEFAULT_ODR);
     actual_odr = get_acc_gyro_odr();
-    config_message["sample_rate"] = (int)actual_odr;
+    config_message["sample_rate"] = actual_odr;
     config_message["column_location"]["GyroscopeX"] = column_index++;
     config_message["column_location"]["GyroscopeY"] = column_index++;
     config_message["column_location"]["GyroscopeZ"] = column_index++;
 #endif
 
 #if ENABLE_MAG
-    IMU.setMagnetODR(mag_speed);
+    IMU.setMagnetODR(MAG_DEFAULT_ODR);
     config_message["column_location"]["MagnetometerX"] = column_index++;
     config_message["column_location"]["MagnetometerY"] = column_index++;
     config_message["column_location"]["MagnetometerZ"] = column_index++;
@@ -267,7 +267,6 @@ void loop()
             }
         }
     }
-
 
     else
     {
