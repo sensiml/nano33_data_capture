@@ -1,5 +1,5 @@
-#ifndef __COLLECTION_CONFIG_H__
-#define __COLLECTION_CONFIG_H__
+#ifndef __SENSOR_CONFIG_H__
+#define __SENSOR_CONFIG_H__
 #include <ArduinoJson.h>
 
 
@@ -94,4 +94,4 @@ uint8_t* getSampleBuffer();
 
 #endif //ENABLE_AUDIO
 
-#endif //__COLLECTION_CONFIG_H__
+#endif //__SENSOR_CONFIG_H__

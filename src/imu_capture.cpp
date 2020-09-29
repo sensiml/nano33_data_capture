@@ -1,4 +1,4 @@
-#include <collection_config.h>
+#include <sensor_config.h>
 #include <ArduinoJson.h>
 
 #if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG

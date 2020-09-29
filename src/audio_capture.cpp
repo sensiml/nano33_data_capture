@@ -1,4 +1,4 @@
-#include <collection_config.h>
+#include <sensor_config.h>
 #include <ArduinoJson.h>
 #if ENABLE_AUDIO
 #include <PDM.h>

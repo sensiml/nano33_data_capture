@@ -6,7 +6,7 @@
 #include <Arduino_LPS22HB.h> //Include library to read Pressure
 #include <Arduino_LSM9DS1.h> //Include the library for 9-axis IMU
 
-#include "collection_config.h"
+#include "sensor_config.h"
 
 
 
