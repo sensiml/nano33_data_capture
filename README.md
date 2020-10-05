@@ -4,6 +4,8 @@ This provides a [PlatformIO](https://platformio.org/) project to flash the Ardui
 
 This code is meant as a reference code for setting up data capture with any Arduino Device. This firmware collects data from the LSM9DS1 9-axis accelerometer only. Other sensors can be added by extending this firmware.
 
+Documentation for using this firmware is provided at [SensiML's documentation site](https://sensiml.com/documentation/firmware/arduino-nano33/arduino-nano33.html)
+
 ## Requirements for building
 
 - PlatformIO IDE (or plugin for your favorite IDE, command line interface)

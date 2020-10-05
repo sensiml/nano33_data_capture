@@ -33,7 +33,7 @@ BLEDescriptor     sensorDataDescriptor("2901", "Sensor Data TX");
 
 static char ble_output_buffer[WRITE_BUFFER_SIZE];
 
-static int actual_odr;
+extern int actual_odr;
 
 static bool          config_received = false;
 static unsigned long currentMs, previousMs;
@@ -146,6 +146,7 @@ void setup()
 #if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
     column_index += setup_imu(config_message, column_index);
     interval = (1000 / (long) actual_odr);
+
 #endif
 
     delay(1000);
@@ -153,7 +154,8 @@ void setup()
 }
 
 
-static int packetNum = 0;
+static int packetNum      = 0;
+static int sensorRawIndex = 0;
 void       loop()
 {
     currentMs = millis();
@@ -200,20 +202,20 @@ void       loop()
         // save the last time you blinked the LED
         previousMs = currentMs;
 #if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
-        update_imu();
+        sensorRawIndex = update_imu(sensorRawIndex);
         packetNum++;
+        int16_t* pData = get_imu_pointer();
 #if USE_BLE
-        sensorDataChar.writeValue((void*) sensorRawData, sensorRawIndex * sizeof(int16_t));
+        sensorDataChar.writeValue((void*) pData, sensorRawIndex * sizeof(int16_t));
         sensorRawIndex = 0;
-        memset(sensorRawData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
+        memset(pData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
 #else
         if (packetNum == MAX_SAMPLES_PER_PACKET)
         {
-            Serial.write((uint8_t*) sensorRawData, sensorRawIndex * sizeof(int16_t));
+            Serial.write((uint8_t*) pData, sensorRawIndex * sizeof(int16_t));
             Serial.flush();
             sensorRawIndex = 0;
-            memset(
-                sensorRawData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
+            memset(pData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
             packetNum = 0;
         }
 #endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG

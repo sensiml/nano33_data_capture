@@ -35,15 +35,14 @@ const int WRITE_BUFFER_SIZE = 256;
  */
 
 // IMU Sensors Enable/Disable
-#define ENABLE_ACCEL 0
-#define ENABLE_GYRO 0
+#define ENABLE_ACCEL 1
+#define ENABLE_GYRO 1
 #define ENABLE_MAG 0
 
 #if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
-int setup_imu(const JsonDocument& config_message, int column_start);
-int16_t sensorRawData[MAX_SAMPLES_PER_PACKET*MAX_NUMBER_OF_COLUMNS];
-int sensorRawIndex = 0;
-void update_imu();
+int setup_imu(JsonDocument& config_message, int column_start);
+int16_t* get_imu_pointer();
+int update_imu(int startIndex);
 //IMU ODR settings. Note: Gyroscope and Accel are linked.
 typedef enum {
     //Sample Rate 0:off, 1:10Hz, 2:50Hz, 3:119Hz, 4:238Hz, 5:476Hz, 6:952Hz
@@ -71,13 +70,13 @@ typedef enum {
 } mag_odr_t;
 
 //Default sample rates. Note: Mag will be read at a higher rate.
-#define ACCEL_GYRO_DEFAULT_ODR ACCEL_GYRO_ODR_119HZ
+#define ACCEL_GYRO_DEFAULT_ODR ACCEL_GYRO_ODR_476HZ
 #define MAG_DEFAULT_ODR MAG_ODR_20HZ
 
 #endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
 
 
-#define ENABLE_AUDIO 1
+#define ENABLE_AUDIO 0
 #if ENABLE_AUDIO
 #define AUDIO_SAMPLE_RATE 16000
 int setup_audio(JsonDocument& config_message, int column_start);

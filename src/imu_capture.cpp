@@ -1,7 +1,12 @@
 #include <sensor_config.h>
 #include <ArduinoJson.h>
+#include <Arduino_LSM9DS1.h>
 
 #if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
+
+int actual_odr;
+int16_t sensorRawData[MAX_SAMPLES_PER_PACKET*MAX_NUMBER_OF_COLUMNS];
+
 
 static int get_acc_gyro_odr()
 {
@@ -22,9 +27,9 @@ static int get_acc_gyro_odr()
     }
 }
 
-void update_imu()
+int update_imu(int startIndex)
 {
-    // Accelerometer values IMU.accelerationAvailable() &&
+    int sensorRawIndex = startIndex;
     if (ENABLE_ACCEL)
     {
         IMU.readRawAccelInt16(sensorRawData[sensorRawIndex++],
@@ -32,7 +37,6 @@ void update_imu()
                               sensorRawData[sensorRawIndex++]);
     }
 
-    // Gyroscope values IMU.gyroscopeAvailable() &&
     if (ENABLE_GYRO)
     {
         IMU.readRawGyroInt16(sensorRawData[sensorRawIndex++],
@@ -40,16 +44,21 @@ void update_imu()
                              sensorRawData[sensorRawIndex++]);
     }
 
-    // Magnetometer values IMU.magneticFieldAvailable() &&
     if (ENABLE_MAG)
     {
         IMU.readRawMagnetInt16(sensorRawData[sensorRawIndex++],
                                sensorRawData[sensorRawIndex++],
                                sensorRawData[sensorRawIndex++]);
     }
+    return sensorRawIndex;
 }
 
-int setup_imu(DynamicJsonDocument& config_message, int column_start)
+int16_t* get_imu_pointer()
+{
+    return &sensorRawData[0];
+}
+
+int setup_imu(JsonDocument& config_message, int column_start)
 {
     int column_index = column_start;
     if (!IMU.begin())  // Initialize IMU sensor
@@ -76,15 +85,15 @@ int setup_imu(DynamicJsonDocument& config_message, int column_start)
 #elif (ENABLE_ACCEL && ENABLE_GYRO)
     IMU.setAccelODR(ACCEL_GYRO_DEFAULT_ODR);
     IMU.setGyroODR(ACCEL_GYRO_DEFAULT_ODR);
-    actual_odr                                            = get_acc_gyro_odr();
-    config_message["sample_rate"]                         = actual_odr;
-    v config_message["column_location"]["AccelerometerX"] = column_index++;
-    config_message["column_location"]["AccelerometerY"]   = column_index++;
-    config_message["column_location"]["AccelerometerZ"]   = column_index++;
-    config_message["column_location"]["GyroscopeX"]       = column_index++;
-    config_message["column_location"]["GyroscopeY"]       = column_index++;
-    config_message["column_location"]["GyroscopeZ"]       = column_index++;
-    actual_odr                                            = get_acc_gyro_odr();
+    actual_odr                                          = get_acc_gyro_odr();
+    config_message["sample_rate"]                       = actual_odr;
+    config_message["column_location"]["AccelerometerX"] = column_index++;
+    config_message["column_location"]["AccelerometerY"] = column_index++;
+    config_message["column_location"]["AccelerometerZ"] = column_index++;
+    config_message["column_location"]["GyroscopeX"]     = column_index++;
+    config_message["column_location"]["GyroscopeY"]     = column_index++;
+    config_message["column_location"]["GyroscopeZ"]     = column_index++;
+    actual_odr                                          = get_acc_gyro_odr();
 #else  // gyro only
     IMU.setAccelODR(ACCEL_GYRO_ODR_OFF);
     IMU.setGyroODR(ACCEL_GYRO_DEFAULT_ODR);
@@ -104,6 +113,7 @@ int setup_imu(DynamicJsonDocument& config_message, int column_start)
     IMU.setMagnetODR(0);
 #endif
     IMU.setContinuousMode();
+    return column_index;
 }
 
 #endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
