@@ -1,9 +1,6 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <Arduino_APDS9960.h>  //Include library for colour, proximity and gesture recognition
-#include <Arduino_HTS221.h>    //Include library to read Temperature and Humidity
-#include <Arduino_LPS22HB.h>   //Include library to read Pressure
 #include <Arduino_LSM9DS1.h>   //Include the library for 9-axis IMU
 
 #include "sensor_config.h"

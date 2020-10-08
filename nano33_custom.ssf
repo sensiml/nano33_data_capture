@@ -1,0 +1,81 @@
+{
+    "uuid": "4b11f17d-1ecc-4086-9526-da9ef2fc6417",
+    "name": "Nano33 BLE Custom",
+    "collection_methods": [
+        {
+            "name": "live",
+            "display_name": "Live Stream Capture",
+            "storage_path": null,
+            "is_default": true
+        }
+    ],
+    "device_connections": [
+        {
+            "name": "serial_simple_stream",
+            "display_name": "Data Stream Serial Port",
+            "value": 1,
+            "is_default": true,
+            "serial_port_configuration": {
+                "com_port": null,
+                "baud": 921600,
+                "stop_bits": 1,
+                "parity": 0,
+                "handshake": 0,
+                "max_live_sample_rate": 611
+            }
+        }
+    ],
+    "capture_sources": [
+        {
+            "max_throughput": 0,
+            "name": "Motion",
+            "part": "LSM9DS1",
+            "sample_rates": [
+                476,
+                238,
+                119,
+                50,
+                10
+            ],
+            "sensors": [
+                {
+                    "column_count": 3,
+                    "column_suffixes": ["X", "Y", "Z"],
+                    "type": "Accelerometer",
+                    "parameters": [],
+                    "sensor_id": 1,
+                    "can_live_stream": false
+                },
+                {
+                    "column_count": 3,
+                    "column_suffixes": ["X", "Y", "Z"],
+                    "type": "Gyroscope",
+                    "parameters": [],
+                    "sensor_id": 2,
+                    "can_live_stream": false
+                }
+            ],
+            "sensor_combinations": null
+        },
+        {
+            "max_throughput": 0,
+            "name": "Audio",
+            "part": "Default",
+            "sample_rates": [
+                16000
+            ],
+            "sensors": [
+                {
+                    "column_count": 1,
+                    "column_suffixes": ["0"],
+                    "type": "Microphone",
+                    "parameters": [],
+                    "sensor_id": 3,
+                    "can_live_stream": false
+                }
+            ],
+            "sensor_combinations": null
+        }
+    ],
+    "is_little_endian": true
+}
