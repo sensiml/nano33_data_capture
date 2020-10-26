@@ -70,7 +70,7 @@ typedef enum {
 } mag_odr_t;
 
 //Default sample rates. Note: Mag will be read at a higher rate.
-#define ACCEL_GYRO_DEFAULT_ODR ACCEL_GYRO_ODR_476HZ
+#define ACCEL_GYRO_DEFAULT_ODR ACCEL_GYRO_ODR_119HZ
 #define MAG_DEFAULT_ODR MAG_ODR_20HZ
 
 #endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG

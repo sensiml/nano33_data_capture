@@ -16,5 +16,6 @@ Documentation for using this firmware is provided at [SensiML's documentation si
 
 - Currently only works over serial port. ArduinoBLE library consistently crashes when attempting to connect via Windows BLE libraries
 - Magnetometer will be collected at the higher sample rate of Accel/Gyro, should it be used.
+- 476hz IMU appears to be choppy when connected to Data Capture Lab.
 
 
