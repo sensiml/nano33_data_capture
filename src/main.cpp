@@ -5,7 +5,6 @@
 
 #include "sensor_config.h"
 
-
 #if USE_BLE
 #define MAX_SAMPLES_PER_PACKET 1
 #include <ArduinoBLE.h>
@@ -37,8 +36,12 @@ static unsigned long currentMs, previousMs;
 static long          interval = 0;
 extern volatile int  samplesRead;
 
-
 DynamicJsonDocument config_message(256);
+#if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
+auto& dataOutSerial = Serial1;
+#else
+auto& dataOutSerial = Serial;
+#endif //USE_SECOND_SERIAL_PORT_FOR_OUTPUT
 
 int column_index = 0;
 
@@ -49,8 +52,8 @@ static void sendJsonConfig()
     configChar.writeValue(ble_output_buffer, WRITE_BUFFER_SIZE);
 #else
     serializeJson(config_message, ble_output_buffer, WRITE_BUFFER_SIZE);
-    Serial.println(ble_output_buffer);
-    Serial.flush();
+    dataOutSerial.println(ble_output_buffer);
+    dataOutSerial.flush();
 #endif  // USE_BLE
 }
 
@@ -130,7 +133,11 @@ static void setup_ble()
 void setup()
 {
     Serial.begin(SERIAL_BAUD_RATE);
+    delay(2000);
     Serial.println("Setting up...");
+#if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
+    Serial1.begin(SERIAL_BAUD_RATE);
+#endif //USE_SECOND_SERIAL_PORT_FOR_OUTPUT
 
 #if USE_BLE
     setup_ble();
@@ -145,6 +152,7 @@ void setup()
     interval = (1000 / (long) actual_odr);
 
 #endif
+    config_message["samples_per_packet"] = MAX_SAMPLES_PER_PACKET;
 
     delay(1000);
     sendJsonConfig();
@@ -180,11 +188,16 @@ void       loop()
     {
         sendJsonConfig();
         delay(1000);
-        if (Serial.available() > 0)
+        if (dataOutSerial.available() > 0)
         {
-            String rx = Serial.readString();
-            if (rx.equals("connect"))
+            String rx = dataOutSerial.readString();
+            Serial.println(rx);
+            if (rx.equals("connect") || rx.equals("cnnect"))
             {
+                #if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
+                Serial.println("Got Connect message");
+
+                #endif
                 config_received = true;
             }
         }
@@ -209,8 +222,8 @@ void       loop()
 #else
         if (packetNum == MAX_SAMPLES_PER_PACKET)
         {
-            Serial.write((uint8_t*) pData, sensorRawIndex * sizeof(int16_t));
-            Serial.flush();
+            dataOutSerial.write((uint8_t*) pData, sensorRawIndex * sizeof(int16_t));
+            dataOutSerial.flush();
             sensorRawIndex = 0;
             memset(pData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
             packetNum = 0;
@@ -220,8 +233,8 @@ void       loop()
 #if ENABLE_AUDIO
         if (samplesRead)
         {
-            Serial.write(getSampleBuffer(), samplesRead * 2);
-            Serial.flush();
+            dataOutSerial.write(getSampleBuffer(), samplesRead * 2);
+            dataOutSerial.flush();
             samplesRead = 0;
         }
 #endif  // ENABLE_AUDIO
