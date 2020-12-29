@@ -2,12 +2,17 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Arduino_LSM9DS1.h>   //Include the library for 9-axis IMU
-
+#include <ArduinoBLE.h>
 #include "sensor_config.h"
 
 #if USE_BLE
-#define MAX_SAMPLES_PER_PACKET 1
-#include <ArduinoBLE.h>
+
+const char* nameOfPeripheral = "Nano 33 DCL";
+const char* uuidOfService    = "16480000-0525-4ad5-b4fb-6dd83f49546b";
+const char* uuidOfConfigChar = "16480001-0525-4ad5-b4fb-6dd83f49546b";
+const char* uuidOfDataChar   = "16480002-0525-4ad5-b4fb-6dd83f49546b";
+
+bool WRITE_BUFFER_FIXED_LENGTH = false;
 
 // BLE Service
 BLEService sensorService(uuidOfService);
@@ -166,7 +171,6 @@ void       loop()
     currentMs = millis();
 #if USE_BLE
 
-    delay(1000);
     BLEDevice central = BLE.central();
     if (central)
     {
@@ -239,5 +243,4 @@ void       loop()
         }
 #endif  // ENABLE_AUDIO
     }
-}
 }
