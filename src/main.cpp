@@ -68,14 +68,15 @@ static void sendJsonConfig()
  */
 void connectedLight()
 {
-    digitalWrite(LEDR, LOW);
-    digitalWrite(LEDG, HIGH);
+    digitalWrite(LEDR, HIGH);  
+    digitalWrite(LEDG, LOW);
 }
 
 void disconnectedLight()
 {
-    digitalWrite(LEDR, HIGH);
-    digitalWrite(LEDG, LOW);
+    digitalWrite(LEDR, LOW);
+    digitalWrite(LEDG, HIGH);
+    
 }
 
 void onBLEConnected(BLEDevice central)
@@ -93,13 +94,6 @@ void onBLEDisconnected(BLEDevice central)
     BLE.setConnectable(true);
 }
 
-void onDataCharSubscribed(BLEDevice central, BLECharacteristic ch)
-{
-    if (ch.uuid() == sensorDataChar.uuid())
-    {
-        config_received = true;
-    }
-}
 
 static void setup_ble()
 {
@@ -126,8 +120,6 @@ static void setup_ble()
     // Bluetooth LE connection handlers.
     BLE.setEventHandler(BLEConnected, onBLEConnected);
     BLE.setEventHandler(BLEDisconnected, onBLEDisconnected);
-
-    sensorDataChar.setEventHandler(BLESubscribed, onDataCharSubscribed);
 
     BLE.advertise();
 
@@ -176,11 +168,7 @@ void       loop()
     {
         if (central.connected())
         {
-            connectedLight();
-            if (!config_received)
-            {
-                return;
-            }
+            connectedLight();          
         }
     }
     else
