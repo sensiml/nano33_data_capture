@@ -3,18 +3,23 @@
 #include <ArduinoJson.h>
 
 
-/**
- * BLE Settings
- */
+//  Enable/Disable 
 #define USE_BLE 1
 
+#define USE_SECOND_SERIAL_PORT_FOR_OUTPUT 1
 
 #define ENABLE_AUDIO 0
 
-// IMU Sensors Enable/Disable
 #define ENABLE_ACCEL 1
 #define ENABLE_GYRO 1
 #define ENABLE_MAG 0
+
+
+const int WRITE_BUFFER_SIZE = 256;
+
+/**
+ * BLE Settings
+ */
 
 #if USE_BLE
 #define MAX_NUMBER_OF_COLUMNS 10
@@ -27,21 +32,16 @@
 /**
  * Serial Port Settings
  */
-#define USE_SECOND_SERIAL_PORT_FOR_OUTPUT 1
-
 #if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
 #define SERIAL_BAUD_RATE 115200 *4
 #else
 #define SERIAL_BAUD_RATE 115200 * 8
 #endif //USE_SECOND_SERIAL_PORT_FOR_OUTPUT
 
-const int WRITE_BUFFER_SIZE = 256;
 
 /**
  * IMU Settings
  */
-
-
 #if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
 int      setup_imu(JsonDocument& config_message, int column_start);
 int16_t* get_imu_pointer();
@@ -80,7 +80,11 @@ typedef enum
 
 #endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
 
-#define ENABLE_AUDIO 0	#endif  //__SENSOR_CONFIG_H__
+
+
+/**
+ * Audio Settings
+ */
 #if ENABLE_AUDIO	
 #define AUDIO_SAMPLE_RATE 16000	
 int setup_audio(JsonDocument& config_message, int column_start);	
