@@ -95,6 +95,21 @@ typedef enum
 
 #endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
 
+#define ENABLE_AUDIO 0	#endif  //__SENSOR_CONFIG_H__
+#if ENABLE_AUDIO	
+#define AUDIO_SAMPLE_RATE 16000	
+int setup_audio(JsonDocument& config_message, int column_start);	
+uint8_t* getSampleBuffer();	
+#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG	
+#warning “Audio and IMU are enabled. only audio will be used”	
+#undef ENABLE_ACCEL	
+#undef ENABLE_GYRO	
+#undef ENABLE_MAG	
+#define ENABLE_ACCEL 0	
+#define ENABLE_GYRO  0	
+#define ENABLE_MAG   0	
+#endif //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG	
+#endif //ENABLE_AUDIO
 
 <<<<<<< HEAD
 #define ENABLE_AUDIO 1
