@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 
 
-//  Enable/Disable 
+//  Enable/Disable
 #define USE_BLE 1
 
 #define USE_SECOND_SERIAL_PORT_FOR_OUTPUT 1
@@ -80,25 +80,22 @@ typedef enum
 
 #endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
 
+#define ENABLE_AUDIO 0
+#if ENABLE_AUDIO
+#define AUDIO_SAMPLE_RATE 16000
+int setup_audio(JsonDocument& config_message, int column_start);
+uint8_t* getSampleBuffer();
+#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
+#warning "Audio and IMU are enabled. only audio will be used"
+#undef ENABLE_ACCEL
+#undef ENABLE_GYRO
+#undef ENABLE_MAG
+#define ENABLE_ACCEL 0
+#define ENABLE_GYRO  0
+#define ENABLE_MAG   0
 
-
-/**
- * Audio Settings
- */
-#if ENABLE_AUDIO	
-#define AUDIO_SAMPLE_RATE 16000	
-int setup_audio(JsonDocument& config_message, int column_start);	
-uint8_t* getSampleBuffer();	
-#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG	
-#warning “Audio and IMU are enabled. only audio will be used”	
-#undef ENABLE_ACCEL	
-#undef ENABLE_GYRO	
-#undef ENABLE_MAG	
-#define ENABLE_ACCEL 0	
-#define ENABLE_GYRO  0	
-#define ENABLE_MAG   0	
-#endif //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG	
-#endif //ENABLE_AUDIO
-
+#undef MAX_SAMPLES_PER_PACKET
+#define MAX_SAMPLES_PER_PACKET 128
+#endif //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
 
 #endif  //__SENSOR_CONFIG_H__

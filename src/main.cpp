@@ -197,7 +197,14 @@ void       loop()
 
     else
     {
-
+        if (dataOutSerial.available() > 0)
+        {
+            String rx = dataOutSerial.readString();
+            if( rx.equals("disconnect"))
+            {
+                config_received = false;
+            }
+        }
 #endif
     if (currentMs - previousMs >= interval)
     {
