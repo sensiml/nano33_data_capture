@@ -2,9 +2,10 @@
 #define __SENSOR_CONFIG_H__
 #include <ArduinoJson.h>
 
-
 //  Enable/Disable
+#ifndef USE_BLE
 #define USE_BLE 1
+#endif
 
 #define USE_SECOND_SERIAL_PORT_FOR_OUTPUT 1
 
@@ -97,5 +98,5 @@ uint8_t* getSampleBuffer();
 #undef MAX_SAMPLES_PER_PACKET
 #define MAX_SAMPLES_PER_PACKET 128
 #endif //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
-
+#endif //ENABLE_AUDIO
 #endif  //__SENSOR_CONFIG_H__

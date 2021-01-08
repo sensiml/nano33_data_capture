@@ -2,11 +2,10 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Arduino_LSM9DS1.h>   //Include the library for 9-axis IMU
-#include <ArduinoBLE.h>
 #include "sensor_config.h"
 
 #if USE_BLE
-
+#include <ArduinoBLE.h>
 const char* nameOfPeripheral = "Nano 33 DCL";
 const char* uuidOfService    = "16480000-0525-4ad5-b4fb-6dd83f49546b";
 const char* uuidOfConfigChar = "16480001-0525-4ad5-b4fb-6dd83f49546b";
@@ -68,7 +67,7 @@ static void sendJsonConfig()
  */
 void connectedLight()
 {
-    digitalWrite(LEDR, HIGH);  
+    digitalWrite(LEDR, HIGH);
     digitalWrite(LEDG, LOW);
 }
 
@@ -76,7 +75,7 @@ void disconnectedLight()
 {
     digitalWrite(LEDR, LOW);
     digitalWrite(LEDG, HIGH);
-    
+
 }
 
 void onBLEConnected(BLEDevice central)
@@ -168,7 +167,7 @@ void       loop()
     {
         if (central.connected())
         {
-            connectedLight();          
+            connectedLight();
         }
     }
     else
@@ -206,36 +205,40 @@ void       loop()
             }
         }
 #endif
-    if (currentMs - previousMs >= interval)
-    {
-        // save the last time you blinked the LED
-        previousMs = currentMs;
-#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
-        sensorRawIndex = update_imu(sensorRawIndex);
-        packetNum++;
-        int16_t* pData = get_imu_pointer();
-#if USE_BLE
-        sensorDataChar.writeValue((void*) pData, sensorRawIndex * sizeof(int16_t));
-        sensorRawIndex = 0;
-        memset(pData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
-#else
-        if (packetNum == MAX_SAMPLES_PER_PACKET)
+        if (currentMs - previousMs >= interval)
         {
-            dataOutSerial.write((uint8_t*) pData, sensorRawIndex * sizeof(int16_t));
-            dataOutSerial.flush();
+            // save the last time you blinked the LED
+            previousMs = currentMs;
+    #if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
+            sensorRawIndex = update_imu(sensorRawIndex);
+            packetNum++;
+            int16_t* pData = get_imu_pointer();
+    #if USE_BLE
+            sensorDataChar.writeValue((void*) pData, sensorRawIndex * sizeof(int16_t));
             sensorRawIndex = 0;
             memset(pData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
-            packetNum = 0;
+    #else
+            if (packetNum == MAX_SAMPLES_PER_PACKET)
+            {
+                dataOutSerial.write((uint8_t*) pData, sensorRawIndex * sizeof(int16_t));
+                dataOutSerial.flush();
+                sensorRawIndex = 0;
+                memset(pData, 0, MAX_NUMBER_OF_COLUMNS * MAX_SAMPLES_PER_PACKET * sizeof(int16_t));
+                packetNum = 0;
+            }
+    #endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
+    #endif  // USE_BLE
+
+    #if ENABLE_AUDIO
+            if (samplesRead)
+            {
+                dataOutSerial.write(getSampleBuffer(), samplesRead * 2);
+                dataOutSerial.flush();
+                samplesRead = 0;
+            }
+    #endif  // ENABLE_AUDIO
         }
-#endif  //#if ENABLE_ACCEL || ENABLE_GYRO || ENABLE_MAG
-#endif  // USE_BLE
-#if ENABLE_AUDIO
-        if (samplesRead)
-        {
-            dataOutSerial.write(getSampleBuffer(), samplesRead * 2);
-            dataOutSerial.flush();
-            samplesRead = 0;
-        }
-#endif  // ENABLE_AUDIO
     }
-}
+#if USE_BLE==0
+} //loop()
+#endif
