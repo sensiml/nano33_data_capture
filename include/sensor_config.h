@@ -7,7 +7,7 @@
 #define USE_BLE 1
 #endif
 
-#define USE_SECOND_SERIAL_PORT_FOR_OUTPUT 1
+#define USE_SECOND_SERIAL_PORT_FOR_OUTPUT 0
 
 #define ENABLE_AUDIO 0
 
