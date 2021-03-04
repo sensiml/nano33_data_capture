@@ -31,7 +31,7 @@ BLEDescriptor     sensorDataDescriptor("2901", "Sensor Data TX");
 #endif  // USE_BLE
 
 
-static char ble_output_buffer[WRITE_BUFFER_SIZE];
+static int8_t ble_output_buffer[WRITE_BUFFER_SIZE];
 
 extern int actual_odr;
 
