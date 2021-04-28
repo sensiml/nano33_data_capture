@@ -23,6 +23,21 @@
                 "handshake": 0,
                 "max_live_sample_rate": 611
             }
+        },
+        {
+            "name": "wifi_simple",
+            "display_name": "Simple Stream over WiFi",
+            "value": 2,
+            "is_default": true,
+            "wifi_configuration": {
+                "use_mqttsn": false,
+                "use_external_broker": false,
+                "external_broker_address": "",
+                "broker_port": 1885,
+                "device_ip_address": null,
+                "device_port": 5555,
+                "max_live_sample_rate": 1000000
+            }
         }
     ],
     "capture_sources": [
@@ -40,7 +55,11 @@
             "sensors": [
                 {
                     "column_count": 3,
-                    "column_suffixes": ["X", "Y", "Z"],
+                    "column_suffixes": [
+                        "X",
+                        "Y",
+                        "Z"
+                    ],
                     "type": "Accelerometer",
                     "parameters": [],
                     "sensor_id": 1,
@@ -48,7 +67,11 @@
                 },
                 {
                     "column_count": 3,
-                    "column_suffixes": ["X", "Y", "Z"],
+                    "column_suffixes": [
+                        "X",
+                        "Y",
+                        "Z"
+                    ],
                     "type": "Gyroscope",
                     "parameters": [],
                     "sensor_id": 2,
@@ -67,7 +90,9 @@
             "sensors": [
                 {
                     "column_count": 1,
-                    "column_suffixes": ["0"],
+                    "column_suffixes": [
+                        "0"
+                    ],
                     "type": "Microphone",
                     "parameters": [],
                     "sensor_id": 3,

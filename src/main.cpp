@@ -55,8 +55,8 @@ static void sendJsonConfig()
     serializeJson(config_message, ble_output_buffer, WRITE_BUFFER_SIZE);
     configChar.writeValue(ble_output_buffer, WRITE_BUFFER_SIZE);
 #else
-    serializeJson(config_message, ble_output_buffer, WRITE_BUFFER_SIZE);
-    dataOutSerial.println(ble_output_buffer);
+    serializeJson(config_message, (void *)ble_output_buffer, WRITE_BUFFER_SIZE);
+    dataOutSerial.println((char*)ble_output_buffer);
     dataOutSerial.flush();
 #endif  // USE_BLE
 }
