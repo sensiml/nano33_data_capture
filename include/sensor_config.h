@@ -2,10 +2,6 @@
 #define __SENSOR_CONFIG_H__
 #include <ArduinoJson.h>
 
-//  Enable/Disable
-#ifndef USE_BLE
-#define USE_BLE 1
-#endif
 
 #define USE_SECOND_SERIAL_PORT_FOR_OUTPUT 0
 
