@@ -1,48 +1,42 @@
 {
-    "uuid": "4b11f17d-1ecc-4086-9526-da9ef2fc6417",
-    "name": "Nano33 BLE Custom",
-    "collection_methods": [
+    "uuid": "00000000-0000-0000-0000-000000000000",
+    "device_name": "Nano33 BLE Sense Custom",
+    "device_manufacturer": "Arduino",
+    "plugin_developer": "Custom",
+    "firmware_download_links": [
         {
-            "name": "live",
-            "display_name": "Live Stream Capture",
-            "storage_path": null,
-            "is_default": true
+            "title": "Data Collection Firmware",
+            "description": "SensiML documentation for building data collection and recognition firmware",
+            "link": "https://sensiml.com/documentation/firmware/arduino-nano33/arduino-nano33.html"
+        }
+    ],
+    "documentation_links": [
+        {
+            "title": "Arduino Product Page",
+            "description": "Product and support documentation for the Arduino Nano33 BLE Sense",
+            "link": "https://store.arduino.cc/usa/nano-33-ble-sense-with-headers"
         }
     ],
     "device_connections": [
         {
-            "name": "serial_simple_stream",
-            "display_name": "Data Stream Serial Port",
+            "display_name": "Serial Port",
             "value": 1,
             "is_default": true,
             "serial_port_configuration": {
-                "com_port": null,
                 "baud": 921600,
                 "stop_bits": 1,
                 "parity": 0,
-                "handshake": 0,
-                "max_live_sample_rate": 611
+                "handshake": 0
             }
         },
         {
-            "name": "wifi_simple",
-            "display_name": "Simple Stream over WiFi",
+            "display_name": "Wi-Fi",
             "value": 2,
-            "is_default": true,
-            "wifi_configuration": {
-                "use_mqttsn": false,
-                "use_external_broker": false,
-                "external_broker_address": "",
-                "broker_port": 1885,
-                "device_ip_address": null,
-                "device_port": 5555,
-                "max_live_sample_rate": 1000000
-            }
+            "is_default": false
         }
     ],
     "capture_sources": [
         {
-            "max_throughput": 0,
             "name": "Motion",
             "part": "LSM9DS1",
             "sample_rates": [
@@ -60,10 +54,7 @@
                         "Y",
                         "Z"
                     ],
-                    "type": "Accelerometer",
-                    "parameters": [],
-                    "sensor_id": 1,
-                    "can_live_stream": false
+                    "type": "Accelerometer"
                 },
                 {
                     "column_count": 3,
@@ -72,16 +63,11 @@
                         "Y",
                         "Z"
                     ],
-                    "type": "Gyroscope",
-                    "parameters": [],
-                    "sensor_id": 2,
-                    "can_live_stream": false
+                    "type": "Gyroscope"
                 }
-            ],
-            "sensor_combinations": null
+            ]
         },
         {
-            "max_throughput": 0,
             "name": "Audio",
             "part": "Default",
             "sample_rates": [
@@ -90,16 +76,9 @@
             "sensors": [
                 {
                     "column_count": 1,
-                    "column_suffixes": [
-                        "0"
-                    ],
-                    "type": "Microphone",
-                    "parameters": [],
-                    "sensor_id": 3,
-                    "can_live_stream": false
+                    "type": "Microphone"
                 }
-            ],
-            "sensor_combinations": null
+            ]
         }
     ],
     "is_little_endian": true
