@@ -36,7 +36,7 @@ static int8_t ble_output_buffer[WRITE_BUFFER_SIZE];
 extern int actual_odr;
 
 static bool          config_received = false;
-static unsigned long currentMs, previousMs;
+static unsigned long currentMs, previousMs, previousBLECheckMs;
 static long          interval = 0;
 extern volatile int  samplesRead;
 
@@ -165,8 +165,8 @@ static int sensorRawIndex = 0;
 void       loop()
 {
     currentMs = millis();
-#if USE_BLE
 
+#if USE_BLE
     BLEDevice central = BLE.central();
     if (central)
     {
@@ -174,16 +174,18 @@ void       loop()
         {
             connectedLight();
         }
+
     }
     else
     {
         disconnectedLight();
 
-         if (currentMs - previousMs >= 3000)
+         if (currentMs - previousBLECheckMs >= 5000)
          {
-        Serial.print("For Data Capture, connect to BLE address: ");
-        Serial.print(BLE.address());
-        previousMs = currentMs;
+            Serial.print("For Data Capture, connect to BLE address: ");      
+            Serial.println(BLE.address());    
+            Serial.println("Waiting...");        
+            previousBLECheckMs = currentMs;
          }
     }
 #else
@@ -217,7 +219,7 @@ void       loop()
             }
         }
 #endif
-        if (currentMs - previousMs >= interval)
+    if (currentMs - previousMs >= interval)
         {
             // save the last time you blinked the LED
             previousMs = currentMs;
