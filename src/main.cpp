@@ -98,9 +98,12 @@ static void setup_ble()
 {
     if (!BLE.begin())
     {
-        Serial.println("starting BLE failed!");
+        
         while (1)
-            ;
+        {
+            Serial.println("BLE failed to initialize! Aborting..");     
+            delay(1000);
+        }
     }
 
     BLE.setLocalName(nameOfPeripheral);
@@ -129,8 +132,10 @@ static void setup_ble()
 void setup()
 {
     Serial.begin(SERIAL_BAUD_RATE);
+    while (!Serial);
+    Serial.println("Serialize initialized.");
     delay(2000);
-    Serial.println("Setting up...");
+    Serial.println("Setting up senors");
 #if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
     Serial1.begin(SERIAL_BAUD_RATE);
 #endif //USE_SECOND_SERIAL_PORT_FOR_OUTPUT
@@ -173,6 +178,13 @@ void       loop()
     else
     {
         disconnectedLight();
+
+         if (currentMs - previousMs >= 3000)
+         {
+        Serial.print("For Data Capture, connect to BLE address: ");
+        Serial.print(BLE.address());
+        previousMs = currentMs;
+         }
     }
 #else
     if (!config_received)
