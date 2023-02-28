@@ -132,7 +132,11 @@ static void setup_ble()
 void setup()
 {
     Serial.begin(SERIAL_BAUD_RATE);
+#if USE_BLE
+#else
     while (!Serial);
+#endif
+    
     Serial.println("Serialize initialized.");
     delay(2000);
     Serial.println("Setting up senors");
