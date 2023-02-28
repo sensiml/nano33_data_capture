@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 
 
-#define USE_SECOND_SERIAL_PORT_FOR_OUTPUT 0
+#define SERIAL_DEBUG 0
 
 #define ENABLE_AUDIO 0
 
@@ -29,11 +29,9 @@ const int WRITE_BUFFER_SIZE = 256;
 /**
  * Serial Port Settings
  */
-#if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
-#define SERIAL_BAUD_RATE 115200 *4
-#else
+
 #define SERIAL_BAUD_RATE 115200 * 8
-#endif //USE_SECOND_SERIAL_PORT_FOR_OUTPUT
+
 
 
 /**

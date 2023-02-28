@@ -60,16 +60,23 @@ int16_t* get_imu_pointer()
 
 int setup_imu(JsonDocument& config_message, int column_start)
 {
+
     int column_index = column_start;
-    Serial.println("Initializing IMU");
-    if (!IMU.begin())  // Initialize IMU sensor
+#if SERIAL_DEBUG    
+    Serial.println("Setting up IMU");
+#endif    
+if (!IMU.begin())  // Initialize IMU sensor
     {  
         while(1){
+#if SERIAL_DEBUG
             Serial.println("IMU failed to Initlialize! Aborting..");
+#endif
             delay(1000);
         }
     }
+#if SERIAL_DEBUG
     Serial.println("Setting up IMU ODR values");
+#endif
     // Set units.
     IMU.accelUnit  = METERPERSECOND2;
     IMU.gyroUnit   = DEGREEPERSECOND;

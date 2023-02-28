@@ -12,9 +12,14 @@ Documentation for using this firmware is provided at [SensiML's documentation si
 - Arduino Nano33 BLE Sense
 - Windows Computer for Data Capture Lab
 
-## Known Issues
+## Data Collection Application
 
-- Magnetometer will be collected at the higher sample rate of Accel/Gyro, should it be used.
-- 476hz IMU appears to be choppy when connected to Data Capture Lab.
+This project has two output options - BLE or Serial
 
+See sensor_config.h for options to turn on either Audio or the IMU Sensor
 
+To turn on serial debug options set
+
+    #define SERIAL_DEBUG 1
+
+Note: When SERIAL_DEBUG is turned on for the BLE application, it will wait to connect to the Serial port before starting

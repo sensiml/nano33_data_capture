@@ -8,11 +8,17 @@ short        sampleBuffer[2048];
 
 int setup_audio(JsonDocument& config_message, int column_start)
 {
+
+#if SERIAL_DEBUG    
+    Serial.println("Setting up Audio");
+#endif
     int column_index = column_start;
     PDM.onReceive(onPDMdata);
     if (!PDM.begin(1, 16000))
     {
+#if SERIAL_DEBUG
         Serial.println("Failed to start PDM!");
+#endif
         while (1)
             ;
     }

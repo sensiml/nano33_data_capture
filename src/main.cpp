@@ -41,11 +41,10 @@ static long          interval = 0;
 extern volatile int  samplesRead;
 
 DynamicJsonDocument config_message(256);
-#if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
-auto& dataOutSerial = Serial1;
-#else
-auto& dataOutSerial = Serial;
-#endif //USE_SECOND_SERIAL_PORT_FOR_OUTPUT
+
+#if ~USE_BLE
+    auto& dataOutSerial = Serial;
+#endif
 
 int column_index = 0;
 
@@ -80,15 +79,19 @@ void disconnectedLight()
 
 void onBLEConnected(BLEDevice central)
 {
+#if SERIAL_DEBUG
     Serial.print("Connected event, central: ");
     Serial.println(central.address());
+#endif
     connectedLight();
 }
 
 void onBLEDisconnected(BLEDevice central)
 {
+#if SERIAL_DEBUG
     Serial.print("Disconnected event, central: ");
     Serial.println(central.address());
+#endif
     disconnectedLight();
     BLE.setConnectable(true);
 }
@@ -96,12 +99,19 @@ void onBLEDisconnected(BLEDevice central)
 
 static void setup_ble()
 {
+    
+#if SERIAL_DEBUG    
+    Serial.println("Setting up BLE");
+#endif
+
     if (!BLE.begin())
     {
         
         while (1)
         {
+#if SERIAL_DEBUG
             Serial.println("BLE failed to initialize! Aborting..");     
+#endif
             delay(1000);
         }
     }
@@ -124,25 +134,23 @@ static void setup_ble()
     BLE.setEventHandler(BLEDisconnected, onBLEDisconnected);
 
     BLE.advertise();
-
+#if SERIAL_DEBUG
     Serial.println("Bluetooth device active, waiting for connections...");
+#endif
 }
 #endif  //#if USE_BLE
 
 void setup()
 {
+#if SERIAL_DEBUG || !USE_BLE
     Serial.begin(SERIAL_BAUD_RATE);
-#if USE_BLE
-#else
     while (!Serial);
+#if SERIAL_DEBUG 
+    Serial.println("Serial Connection initialized.");     
 #endif
-    
-    Serial.println("Serialize initialized.");
-    delay(2000);
-    Serial.println("Setting up senors");
-#if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
-    Serial1.begin(SERIAL_BAUD_RATE);
-#endif //USE_SECOND_SERIAL_PORT_FOR_OUTPUT
+    delay(1000);
+#endif
+
 
 #if USE_BLE
     setup_ble();
@@ -186,9 +194,11 @@ void       loop()
 
          if (currentMs - previousBLECheckMs >= 5000)
          {
-            Serial.print("For Data Capture, connect to BLE address: ");      
-            Serial.println(BLE.address());    
-            Serial.println("Waiting...");        
+#if SERIAL_DEBUG
+                Serial.print("For Data Capture, connect to BLE address: ");      
+                Serial.println(BLE.address());    
+                Serial.println("Waiting...");   
+#endif     
             previousBLECheckMs = currentMs;
          }
     }
@@ -200,13 +210,14 @@ void       loop()
         if (dataOutSerial.available() > 0)
         {
             String rx = dataOutSerial.readString();
+#if SERIAL_DEBUG            
             Serial.println(rx);
+#endif
             if (rx.equals("connect") || rx.equals("cnnect"))
             {
-                #if USE_SECOND_SERIAL_PORT_FOR_OUTPUT
+#if SERIAL_DEBUG
                 Serial.println("Got Connect message");
-
-                #endif
+#endif
                 config_received = true;
             }
         }
